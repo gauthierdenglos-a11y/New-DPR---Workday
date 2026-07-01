@@ -1,0 +1,97 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum TypeProjet {
+  BUILD
+  RUN
+  FORFAIT
+  REGIE
+  MIXTE
+}
+
+enum Phase {
+  CADRAGE
+  BUILD
+  RECETTE
+  DEPLOIEMENT
+  RUN
+}
+
+enum StatutGlobal {
+  CRITIQUE
+  WARNING
+  SOUS_CONTROLE
+  OK
+}
+
+enum RelationClient {
+  DEGRADEE
+  TENDUE
+  SAINE
+}
+
+enum MeteoEquipe {
+  DESENGAGEMENT
+  FRAGILE
+  ENGAGEE
+}
+
+enum StatutPlan {
+  NON_LANCE
+  EN_COURS
+  PREMIERS_RESULTATS
+  INEFFICACE
+}
+
+model Fiche {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  dateMiseAJour DateTime
+
+  // A. Informations générales
+  projet              String
+  client              String
+  responsablePilotage String
+  typeProjet          TypeProjet
+  phaseActuelle       Phase
+
+  // B. Indicateurs visuels clés
+  statutGlobal              StatutGlobal
+  relationClient            RelationClient
+  relationClientCommentaire String?
+  meteoEquipe               MeteoEquipe
+  signauxFaibles            String?
+
+  // C. Compréhension rapide de la dérive
+  causes Json
+
+  ecartMargePct              Float?
+  ecartMargeCommentaire      String?
+  ecartPlanningJours         Float?
+  ecartPlanningCommentaire   String?
+  chargeReevalueePct         Float?
+  chargeReevalueeCommentaire String?
+  avancementPct              Float?
+  avancementCommentaire      String?
+
+  // D. Plan d'action & trajectoire
+  planRemediationDefini Boolean
+  statutPlan            StatutPlan?
+  actions               Json
+  risques               Json
+  besoinsSupport        Json
+
+  @@index([projet])
+  @@index([dateMiseAJour])
+}
