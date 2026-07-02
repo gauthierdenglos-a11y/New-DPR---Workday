@@ -19,6 +19,7 @@ export function ficheToFormValues(fiche: Fiche | null): FicheFormValues | null {
     projet: fiche.projet,
     client: fiche.client,
     responsablePilotage: fiche.responsablePilotage,
+    responsableEmail: fiche.responsableEmail,
     typeProjet: fiche.typeProjet,
     phaseActuelle: fiche.phaseActuelle,
     statutGlobal: fiche.statutGlobal,

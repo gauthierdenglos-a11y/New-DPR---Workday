@@ -285,6 +285,10 @@ export const ficheFormSchema = z.object({
   projet: z.string().min(1, "Le nom du projet est requis"),
   client: z.string().min(1, "Le client est requis"),
   responsablePilotage: z.string().min(1, "Le responsable pilotage est requis"),
+  responsableEmail: z
+    .string()
+    .min(1, "L'email du responsable est requis")
+    .email("Email invalide"),
   typeProjet: z.enum(TYPE_PROJET),
   phaseActuelle: z.enum(PHASE),
 
@@ -333,6 +337,7 @@ export const DEFAULT_FICHE_VALUES: FicheFormValues = {
   projet: "",
   client: "",
   responsablePilotage: "",
+  responsableEmail: "",
   typeProjet: "TM",
   phaseActuelle: "BUILD",
   statutGlobal: "OK",

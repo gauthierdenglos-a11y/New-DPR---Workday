@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { ficheFormSchema, type FicheFormValues } from "@/lib/validations/fiche";
 import type { Prisma } from "@/lib/generated/prisma/client";
+import { debutDuMois, formatPeriodeFr } from "@/lib/periode";
 
 function toNumberOrNull(value: string | undefined) {
   if (!value || value.trim() === "") return null;
@@ -19,6 +20,7 @@ function toPrismaData(values: FicheFormValues) {
     projet: parsed.projet,
     client: parsed.client,
     responsablePilotage: parsed.responsablePilotage,
+    responsableEmail: parsed.responsableEmail,
     typeProjet: parsed.typeProjet,
     phaseActuelle: parsed.phaseActuelle,
     statutGlobal: parsed.statutGlobal,
@@ -54,14 +56,59 @@ function toPrismaData(values: FicheFormValues) {
 
 export async function createFiche(values: FicheFormValues) {
   const data = toPrismaData(values);
-  const fiche = await prisma.fiche.create({ data });
+  const periode = debutDuMois(data.dateMiseAJour);
+
+  const projet = await prisma.projet.upsert({
+    where: { nom_client: { nom: data.projet, client: data.client } },
+    update: {
+      responsablePilotage: data.responsablePilotage,
+      responsableEmail: data.responsableEmail,
+      typeProjet: data.typeProjet,
+    },
+    create: {
+      nom: data.projet,
+      client: data.client,
+      responsablePilotage: data.responsablePilotage,
+      responsableEmail: data.responsableEmail,
+      typeProjet: data.typeProjet,
+    },
+  });
+
+  const ficheExistante = await prisma.fiche.findUnique({
+    where: { projetId_periode: { projetId: projet.id, periode } },
+  });
+  if (ficheExistante) {
+    throw new Error(
+      `Une fiche existe déjà pour "${data.projet}" (${formatPeriodeFr(periode)}). Modifiez-la plutôt que d'en créer une nouvelle.`,
+    );
+  }
+
+  const fiche = await prisma.fiche.create({
+    data: { ...data, projetId: projet.id, periode, statut: "SOUMISE" },
+  });
   revalidatePath("/fiches");
   redirect(`/fiches/${fiche.id}`);
 }
 
 export async function updateFiche(id: string, values: FicheFormValues) {
   const data = toPrismaData(values);
-  await prisma.fiche.update({ where: { id }, data });
+  const existante = await prisma.fiche.findUniqueOrThrow({ where: { id } });
+
+  await prisma.projet.update({
+    where: { id: existante.projetId },
+    data: {
+      nom: data.projet,
+      client: data.client,
+      responsablePilotage: data.responsablePilotage,
+      responsableEmail: data.responsableEmail,
+      typeProjet: data.typeProjet,
+    },
+  });
+
+  await prisma.fiche.update({
+    where: { id },
+    data: { ...data, statut: "SOUMISE" },
+  });
   revalidatePath("/fiches");
   revalidatePath(`/fiches/${id}`);
   redirect(`/fiches/${id}`);

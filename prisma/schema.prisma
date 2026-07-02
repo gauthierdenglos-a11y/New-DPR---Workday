@@ -71,6 +71,29 @@ enum FreinIa {
   AUTRE
 }
 
+enum FicheStatut {
+  A_COMPLETER
+  SOUMISE
+}
+
+// Un projet suivi dans la durée. Sert d'ancre pour l'historisation mensuelle
+// des fiches et pour savoir à qui envoyer le rappel de clôture.
+model Projet {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  nom                  String
+  client               String
+  responsablePilotage  String
+  responsableEmail     String
+  typeProjet           TypeProjet
+
+  fiches Fiche[]
+
+  @@unique([nom, client])
+}
+
 model Fiche {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
@@ -78,10 +101,19 @@ model Fiche {
 
   dateMiseAJour DateTime
 
+  // Rattachement au projet + période couverte (clôture mensuelle).
+  // Une seule fiche par projet et par mois.
+  projetId      String
+  dossierProjet Projet      @relation(fields: [projetId], references: [id], onDelete: Cascade)
+  periode       DateTime
+  statut        FicheStatut @default(SOUMISE)
+  notifieLe     DateTime?
+
   // A. Informations générales
   projet              String
   client              String
   responsablePilotage String
+  responsableEmail    String     @default("")
   typeProjet          TypeProjet
   phaseActuelle       Phase
 
@@ -123,6 +155,8 @@ model Fiche {
   iaFrein              FreinIa    @default(AUCUN)
   iaFreinCommentaire   String?
 
+  @@unique([projetId, periode])
   @@index([projet])
   @@index([dateMiseAJour])
+  @@index([statut])
 }

@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { StatutGlobalBadge } from "@/components/fiche/status-badge";
+import { FicheStatutBadge } from "@/components/fiche/fiche-statut-badge";
 import { DeleteFicheButton } from "@/components/fiche/delete-fiche-button";
 import { listFiches } from "@/lib/actions/fiche";
 import { PHASE_LABELS } from "@/lib/validations/fiche";
@@ -49,6 +50,7 @@ export default async function FichesPage() {
                     <TableHead>Date de dernière modification</TableHead>
                     <TableHead>Phase</TableHead>
                     <TableHead>Statut</TableHead>
+                    <TableHead>Fiche du mois</TableHead>
                     <TableHead className="text-right">Action</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -64,6 +66,9 @@ export default async function FichesPage() {
                       <TableCell>{PHASE_LABELS[fiche.phaseActuelle]}</TableCell>
                       <TableCell>
                         <StatutGlobalBadge value={fiche.statutGlobal} />
+                      </TableCell>
+                      <TableCell>
+                        <FicheStatutBadge value={fiche.statut} />
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">

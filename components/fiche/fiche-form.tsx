@@ -117,7 +117,11 @@ export function FicheForm({
         ) {
           throw error;
         }
-        toast.error("Impossible d'enregistrer la fiche. Réessayez.");
+        const message =
+          error instanceof Error && error.message
+            ? error.message
+            : "Impossible d'enregistrer la fiche. Réessayez.";
+        toast.error(message);
       }
     });
   };
@@ -168,6 +172,17 @@ export function FicheForm({
                 error={errors.responsablePilotage?.message}
               >
                 <Input placeholder="Nom du DP/CP" {...register("responsablePilotage")} />
+              </Field>
+              <Field
+                label="Email du responsable pilotage"
+                hint="Utilisé pour la notification de clôture mensuelle"
+                error={errors.responsableEmail?.message}
+              >
+                <Input
+                  type="email"
+                  placeholder="prenom.nom@entreprise.com"
+                  {...register("responsableEmail")}
+                />
               </Field>
               <Field label="Type d'engagement sur le projet">
                 <Controller
