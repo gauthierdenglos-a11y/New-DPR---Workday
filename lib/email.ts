@@ -24,7 +24,7 @@ export async function sendClotureNotification({
   client: string;
   periodeLabel: string;
   ficheUrl: string;
-}): Promise<{ sent: boolean; reason?: string }> {
+}): Promise<{ sent: boolean; reason?: string; previewUrl?: string }> {
   const transport = getTransport();
   if (!transport) {
     return { sent: false, reason: "SMTP non configuré (SMTP_HOST manquant)" };
@@ -47,6 +47,7 @@ export async function sendClotureNotification({
     <p><a href="${ficheUrl}">Accéder à la fiche</a></p>
   `;
 
-  await transport.sendMail({ from, to, subject, text, html });
-  return { sent: true };
+  const info = await transport.sendMail({ from, to, subject, text, html });
+  const previewUrl = nodemailer.getTestMessageUrl(info);
+  return { sent: true, previewUrl: previewUrl || undefined };
 }

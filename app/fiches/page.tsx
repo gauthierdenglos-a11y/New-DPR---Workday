@@ -10,6 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { FicheProjetGroup } from "@/components/fiche/fiche-projet-group";
+import { SimulateMonthButton } from "@/components/fiche/simulate-month-button";
 import { listFichesGroupeesParProjet } from "@/lib/actions/fiche";
 
 export default async function FichesPage() {
@@ -25,9 +26,12 @@ export default async function FichesPage() {
               Fiche en cours par projet. Dépliez une ligne pour consulter son historique.
             </p>
           </div>
-          <Button nativeButton={false} render={<Link href="/fiches/nouveau" />}>
-            Nouveau Projet
-          </Button>
+          <div className="flex items-center gap-3">
+            <SimulateMonthButton />
+            <Button nativeButton={false} render={<Link href="/fiches/nouveau" />}>
+              Nouveau Projet
+            </Button>
+          </div>
         </div>
 
         <Card>

@@ -1,19 +1,26 @@
+"use server";
+
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { sendClotureNotification } from "@/lib/email";
-import { debutDuMois, formatPeriodeFr } from "@/lib/periode";
+import { debutDuMois, formatPeriodeFr, moisSuivant } from "@/lib/periode";
 import type { Prisma } from "@/lib/generated/prisma/client";
 
 export type ResultatGeneration = {
   projet: string;
   ficheId: string;
-  email: { sent: boolean; reason?: string };
+  email: { sent: boolean; reason?: string; previewUrl?: string };
 };
 
 // Clôture mensuelle : pour chaque projet déjà suivi, ouvre la fiche du mois en
 // cours en la préremplissant avec les réponses du mois précédent, puis notifie
 // le DP/CP par email avec le lien vers la fiche à mettre à jour.
-export async function generateMonthlyFiches(now: Date = new Date()): Promise<ResultatGeneration[]> {
+// `overrideEmailTo` permet de rediriger toutes les notifications vers une
+// seule adresse (utilisé par la simulation de test, cf. `simulerMoisSuivant`).
+export async function generateMonthlyFiches(
+  now: Date = new Date(),
+  overrideEmailTo?: string,
+): Promise<ResultatGeneration[]> {
   const periode = debutDuMois(now);
   const projets = await prisma.projet.findMany();
   const baseUrl = process.env.APP_BASE_URL || "http://localhost:3000";
@@ -78,7 +85,7 @@ export async function generateMonthlyFiches(now: Date = new Date()): Promise<Res
     });
 
     const email = await sendClotureNotification({
-      to: nouvelle.responsableEmail,
+      to: overrideEmailTo || nouvelle.responsableEmail,
       projet: nouvelle.projet,
       client: nouvelle.client,
       periodeLabel: formatPeriodeFr(periode),
@@ -98,4 +105,24 @@ export async function generateMonthlyFiches(now: Date = new Date()): Promise<Res
     revalidatePath("/fiches");
   }
   return resultats;
+}
+
+const EMAIL_TEST_SIMULATION = "g.denglos@groupeonepoint.com";
+
+export type ResultatSimulation = {
+  periodeLabel: string;
+  resultats: ResultatGeneration[];
+};
+
+// Outil de test : déclenche manuellement la clôture du mois suivant (au lieu
+// d'attendre le vrai changement de calendrier + le cron), pour vérifier la
+// génération des fiches et l'envoi des emails. Toutes les notifications sont
+// redirigées vers une adresse unique le temps des tests.
+export async function simulerMoisSuivant(): Promise<ResultatSimulation> {
+  const derniere = await prisma.fiche.findFirst({ orderBy: { periode: "desc" } });
+  const periodeCible = derniere ? moisSuivant(derniere.periode) : debutDuMois(new Date());
+
+  const resultats = await generateMonthlyFiches(periodeCible, EMAIL_TEST_SIMULATION);
+
+  return { periodeLabel: formatPeriodeFr(periodeCible), resultats };
 }
