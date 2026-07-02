@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { ficheFormSchema, type FicheFormValues } from "@/lib/validations/fiche";
-import type { Prisma } from "@/lib/generated/prisma/client";
+import type { Fiche, Prisma } from "@/lib/generated/prisma/client";
 import { debutDuMois, estHistorisee, formatPeriodeFr } from "@/lib/periode";
 
 function toNumberOrNull(value: string | undefined) {
@@ -133,6 +133,36 @@ export async function deleteFiche(id: string) {
 
 export async function listFiches() {
   return prisma.fiche.findMany({ orderBy: { updatedAt: "desc" } });
+}
+
+export type FicheGroupe = {
+  projetId: string;
+  courante: Fiche;
+  historisees: Fiche[];
+};
+
+// Une entrée par projet : la fiche la plus récente (mise en avant dans la
+// liste) et le reste de son historique, du plus récent au plus ancien.
+export async function listFichesGroupeesParProjet(): Promise<FicheGroupe[]> {
+  const fiches = await prisma.fiche.findMany({ orderBy: { periode: "desc" } });
+
+  const parProjet = new Map<string, Fiche[]>();
+  for (const fiche of fiches) {
+    const liste = parProjet.get(fiche.projetId);
+    if (liste) {
+      liste.push(fiche);
+    } else {
+      parProjet.set(fiche.projetId, [fiche]);
+    }
+  }
+
+  return Array.from(parProjet.values())
+    .map(([courante, ...historisees]) => ({
+      projetId: courante.projetId,
+      courante,
+      historisees,
+    }))
+    .sort((a, b) => b.courante.periode.getTime() - a.courante.periode.getTime());
 }
 
 export async function getFiche(id: string) {
