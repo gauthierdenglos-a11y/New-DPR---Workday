@@ -1,11 +1,7 @@
 import { PrismaClient } from "@/lib/generated/prisma/client";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaPg } from "@prisma/adapter-pg";
 
-// Contournement temporaire (SQLite) en attendant le déblocage de Docker Desktop
-// pour Postgres — voir prisma/README-DB.md pour la marche à suivre.
-const adapter = new PrismaBetterSqlite3({
-  url: (process.env.DATABASE_URL ?? "file:./dev.db").replace(/^file:/, ""),
-});
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;

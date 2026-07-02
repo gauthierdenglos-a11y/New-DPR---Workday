@@ -41,7 +41,3 @@ yarn-error.log*
 next-env.d.ts
 
 /lib/generated/prisma
-
-# local sqlite dev workaround (see prisma/README-DB.md)
-/dev.db
-/dev.db-journal
