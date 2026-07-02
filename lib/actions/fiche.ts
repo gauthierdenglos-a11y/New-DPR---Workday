@@ -26,7 +26,10 @@ function toPrismaData(values: FicheFormValues) {
     relationClientCommentaire: parsed.relationClientCommentaire || null,
     meteoEquipe: parsed.meteoEquipe,
     signauxFaibles: parsed.signauxFaibles || null,
+    departsCles: parsed.departsCles || null,
     causes: parsed.causes as Prisma.InputJsonValue,
+    difficultesMaitrisables: parsed.difficultesMaitrisables || null,
+    difficultesNonMaitrisables: parsed.difficultesNonMaitrisables || null,
     ecartMargePct: toNumberOrNull(parsed.ecartMargePct),
     ecartMargeCommentaire: parsed.ecartMargeCommentaire || null,
     ecartPlanningJours: toNumberOrNull(parsed.ecartPlanningJours),
@@ -40,6 +43,11 @@ function toPrismaData(values: FicheFormValues) {
     actions: parsed.actions as Prisma.InputJsonValue,
     risques: parsed.risques as Prisma.InputJsonValue,
     besoinsSupport: parsed.besoinsSupport as Prisma.InputJsonValue,
+    iaUtilisee: parsed.iaUtilisee,
+    iaPhases: parsed.iaPhases as Prisma.InputJsonValue,
+    iaGainEstime: parsed.iaGainEstime,
+    iaCasUsagePrincipal: parsed.iaCasUsagePrincipal || null,
+    iaFrein: parsed.iaFrein,
   };
 }
 
@@ -56,6 +64,11 @@ export async function updateFiche(id: string, values: FicheFormValues) {
   revalidatePath("/fiches");
   revalidatePath(`/fiches/${id}`);
   redirect(`/fiches/${id}`);
+}
+
+export async function deleteFiche(id: string) {
+  await prisma.fiche.delete({ where: { id } });
+  revalidatePath("/fiches");
 }
 
 export async function listFiches() {

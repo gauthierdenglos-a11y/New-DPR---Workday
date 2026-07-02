@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { StatutGlobalBadge } from "@/components/fiche/status-badge";
+import { DeleteFicheButton } from "@/components/fiche/delete-fiche-button";
 import { listFiches } from "@/lib/actions/fiche";
 import { PHASE_LABELS } from "@/lib/validations/fiche";
 
@@ -63,12 +64,18 @@ export default async function FichesPage() {
                         <StatutGlobalBadge value={fiche.statutGlobal} />
                       </TableCell>
                       <TableCell className="text-right">
-                        <Link
-                          href={`/fiches/${fiche.id}`}
-                          className="text-sm font-medium text-primary hover:underline"
-                        >
-                          Voir / Éditer
-                        </Link>
+                        <div className="flex items-center justify-end gap-2">
+                          <Link
+                            href={`/fiches/${fiche.id}`}
+                            className="text-sm font-medium text-primary hover:underline"
+                          >
+                            É
+                          </Link>
+                          <DeleteFicheButton
+                            ficheId={fiche.id}
+                            projet={fiche.projet}
+                          />
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}

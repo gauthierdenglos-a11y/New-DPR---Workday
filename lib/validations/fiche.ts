@@ -4,24 +4,19 @@ import { z } from "zod";
 // Enums + libellés FR (source : onglet "Listes" du fichier Excel Fiche Projet V2)
 // ---------------------------------------------------------------------------
 
-export const TYPE_PROJET = ["BUILD", "RUN", "FORFAIT", "REGIE", "MIXTE"] as const;
+export const TYPE_PROJET = ["TM", "FORFAIT"] as const;
 export type TypeProjet = (typeof TYPE_PROJET)[number];
 export const TYPE_PROJET_LABELS: Record<TypeProjet, string> = {
-  BUILD: "Build",
-  RUN: "Run",
+  TM: "T&M",
   FORFAIT: "Forfait",
-  REGIE: "Régie",
-  MIXTE: "Mixte",
 };
 
-export const PHASE = ["CADRAGE", "BUILD", "RECETTE", "DEPLOIEMENT", "RUN"] as const;
+export const PHASE = ["BUILD", "RUN", "MIXTE"] as const;
 export type Phase = (typeof PHASE)[number];
 export const PHASE_LABELS: Record<Phase, string> = {
-  CADRAGE: "Cadrage",
   BUILD: "Build",
-  RECETTE: "Recette",
-  DEPLOIEMENT: "Déploiement",
   RUN: "Run",
+  MIXTE: "Mixte",
 };
 
 export const STATUT_GLOBAL = ["CRITIQUE", "WARNING", "SOUS_CONTROLE", "OK"] as const;
@@ -79,6 +74,96 @@ export const PROBABILITE_LABELS: Record<Probabilite, string> = {
   FAIBLE: "Faible",
   MOYENNE: "Moyenne",
   ELEVEE: "Élevée",
+};
+
+// ---------------------------------------------------------------------------
+// E. Intelligence Artificielle
+// ---------------------------------------------------------------------------
+
+export const IA_UTILISEE = ["OUI", "EN_COURS", "NON"] as const;
+export type IaUtilisee = (typeof IA_UTILISEE)[number];
+export const IA_UTILISEE_LABELS: Record<IaUtilisee, string> = {
+  OUI: "Oui",
+  EN_COURS: "En cours de déploiement",
+  NON: "Non",
+};
+
+export const IA_PHASE_KEYS = [
+  "conception",
+  "cadrage",
+  "developpement",
+  "tests",
+  "documentation",
+  "gestionProjet",
+  "deploiement",
+  "support",
+  "autre",
+] as const;
+export type IaPhaseKey = (typeof IA_PHASE_KEYS)[number];
+export const IA_PHASE_LABELS: Record<IaPhaseKey, string> = {
+  conception: "Conception",
+  cadrage: "Cadrage",
+  developpement: "Développement",
+  tests: "Tests",
+  documentation: "Documentation",
+  gestionProjet: "Gestion de projet",
+  deploiement: "Déploiement",
+  support: "Support",
+  autre: "Autre",
+};
+
+export const iaPhasesSchema = z.object({
+  conception: z.boolean(),
+  cadrage: z.boolean(),
+  developpement: z.boolean(),
+  tests: z.boolean(),
+  documentation: z.boolean(),
+  gestionProjet: z.boolean(),
+  deploiement: z.boolean(),
+  support: z.boolean(),
+  autre: z.boolean(),
+});
+export type IaPhases = z.infer<typeof iaPhasesSchema>;
+export const DEFAULT_IA_PHASES: IaPhases = {
+  conception: false,
+  cadrage: false,
+  developpement: false,
+  tests: false,
+  documentation: false,
+  gestionProjet: false,
+  deploiement: false,
+  support: false,
+  autre: false,
+};
+
+export const GAIN_IA = ["ZERO", "MOINS_5", "CINQ_DIX", "DIX_VINGT", "PLUS_20"] as const;
+export type GainIa = (typeof GAIN_IA)[number];
+export const GAIN_IA_LABELS: Record<GainIa, string> = {
+  ZERO: "0 %",
+  MOINS_5: "<5 %",
+  CINQ_DIX: "5-10 %",
+  DIX_VINGT: "10-20 %",
+  PLUS_20: ">20 %",
+};
+
+export const FREIN_IA = [
+  "MANQUE_TEMPS",
+  "MANQUE_COMPETENCES",
+  "CONTRAINTES_CLIENT",
+  "SECURITE_CONFIDENTIALITE",
+  "OUTILS_NON_DISPONIBLES",
+  "AUCUN",
+  "AUTRE",
+] as const;
+export type FreinIa = (typeof FREIN_IA)[number];
+export const FREIN_IA_LABELS: Record<FreinIa, string> = {
+  MANQUE_TEMPS: "Manque de temps",
+  MANQUE_COMPETENCES: "Manque de compétences",
+  CONTRAINTES_CLIENT: "Contraintes client",
+  SECURITE_CONFIDENTIALITE: "Sécurité / Confidentialité",
+  OUTILS_NON_DISPONIBLES: "Outils non disponibles",
+  AUCUN: "Aucun",
+  AUTRE: "Autre",
 };
 
 // ---------------------------------------------------------------------------
@@ -209,9 +294,12 @@ export const ficheFormSchema = z.object({
   relationClientCommentaire: z.string().optional(),
   meteoEquipe: z.enum(METEO_EQUIPE),
   signauxFaibles: z.string().optional(),
+  departsCles: z.string().optional(),
 
   // C. Compréhension de la dérive
   causes: causesSchema,
+  difficultesMaitrisables: z.string().optional(),
+  difficultesNonMaitrisables: z.string().optional(),
   // Champs numériques saisis en texte, convertis en nombre au moment de la sauvegarde (lib/actions/fiche.ts)
   ecartMargePct: z.string().optional(),
   ecartMargeCommentaire: z.string().optional(),
@@ -228,6 +316,13 @@ export const ficheFormSchema = z.object({
   actions: z.array(actionItemSchema).length(3),
   risques: z.array(risqueItemSchema).length(3),
   besoinsSupport: z.array(besoinSupportItemSchema).length(6),
+
+  // E. Intelligence Artificielle
+  iaUtilisee: z.enum(IA_UTILISEE),
+  iaPhases: iaPhasesSchema,
+  iaGainEstime: z.enum(GAIN_IA),
+  iaCasUsagePrincipal: z.string().optional(),
+  iaFrein: z.enum(FREIN_IA),
 });
 
 export type FicheFormValues = z.infer<typeof ficheFormSchema>;
@@ -237,14 +332,17 @@ export const DEFAULT_FICHE_VALUES: FicheFormValues = {
   projet: "",
   client: "",
   responsablePilotage: "",
-  typeProjet: "BUILD",
-  phaseActuelle: "CADRAGE",
+  typeProjet: "TM",
+  phaseActuelle: "BUILD",
   statutGlobal: "OK",
   relationClient: "SAINE",
   relationClientCommentaire: "",
   meteoEquipe: "ENGAGEE",
   signauxFaibles: "",
+  departsCles: "",
   causes: DEFAULT_CAUSES,
+  difficultesMaitrisables: "",
+  difficultesNonMaitrisables: "",
   ecartMargePct: "",
   ecartMargeCommentaire: "",
   ecartPlanningJours: "",
@@ -258,4 +356,9 @@ export const DEFAULT_FICHE_VALUES: FicheFormValues = {
   actions: DEFAULT_ACTIONS,
   risques: DEFAULT_RISQUES,
   besoinsSupport: DEFAULT_BESOINS_SUPPORT,
+  iaUtilisee: "NON",
+  iaPhases: DEFAULT_IA_PHASES,
+  iaGainEstime: "ZERO",
+  iaCasUsagePrincipal: "",
+  iaFrein: "AUCUN",
 };

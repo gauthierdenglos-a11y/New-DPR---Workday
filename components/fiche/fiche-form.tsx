@@ -27,6 +27,14 @@ import {
   CAUSE_KEYS,
   CAUSE_LABELS,
   DEFAULT_FICHE_VALUES,
+  FREIN_IA,
+  FREIN_IA_LABELS,
+  GAIN_IA,
+  GAIN_IA_LABELS,
+  IA_PHASE_KEYS,
+  IA_PHASE_LABELS,
+  IA_UTILISEE,
+  IA_UTILISEE_LABELS,
   IMPACT,
   IMPACT_LABELS,
   METEO_EQUIPE_LABELS,
@@ -161,7 +169,7 @@ export function FicheForm({
               >
                 <Input placeholder="Nom du DP/CP" {...register("responsablePilotage")} />
               </Field>
-              <Field label="Type de projet">
+              <Field label="Type d'engagement sur le projet">
                 <Controller
                   control={control}
                   name="typeProjet"
@@ -183,7 +191,7 @@ export function FicheForm({
                   )}
                 />
               </Field>
-              <Field label="Phase actuelle">
+              <Field label="Phase actuelle du projet">
                 <Controller
                   control={control}
                   name="phaseActuelle"
@@ -259,6 +267,29 @@ export function FicheForm({
                     />
                   </div>
                 )}
+              </div>
+
+              <div className="flex flex-col gap-4">
+                <Field
+                  label="Indiquer, parmi les difficultés rencontrées, celles relevant de facteurs maîtrisables par l'équipe projet (facteurs internes...)"
+                  htmlFor="difficultesMaitrisables"
+                >
+                  <Textarea
+                    id="difficultesMaitrisables"
+                    rows={2}
+                    {...register("difficultesMaitrisables")}
+                  />
+                </Field>
+                <Field
+                  label="Indiquer, parmi les difficultés rencontrées, celles relevant de facteurs non maîtrisables par l'équipe projet (facteurs externes, dépendances...)"
+                  htmlFor="difficultesNonMaitrisables"
+                >
+                  <Textarea
+                    id="difficultesNonMaitrisables"
+                    rows={2}
+                    {...register("difficultesNonMaitrisables")}
+                  />
+                </Field>
               </div>
 
               <div>
@@ -399,6 +430,16 @@ export function FicheForm({
                   rows={2}
                   {...register("signauxFaibles")}
                 />
+                <Field
+                  label="Veuillez préciser si des départs clés (Tech Lead, chef de projet, etc.) ont eu lieu au cours de la dernière période"
+                  htmlFor="departsCles"
+                >
+                  <Textarea
+                    id="departsCles"
+                    rows={2}
+                    {...register("departsCles")}
+                  />
+                </Field>
               </div>
             </CardContent>
           </Card>
@@ -570,6 +611,120 @@ export function FicheForm({
               ))}
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Intelligence Artificielle</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field label="L'IA est-elle utilisée sur votre projet ?">
+              <Controller
+                control={control}
+                name="iaUtilisee"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue>
+                        {(value: string) =>
+                          IA_UTILISEE_LABELS[value as (typeof IA_UTILISEE)[number]]
+                        }
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {IA_UTILISEE.map((value) => (
+                        <SelectItem key={value} value={value}>
+                          {IA_UTILISEE_LABELS[value]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </Field>
+            <Field label="Quel gain estimez-vous obtenir grâce à l'IA sur votre projet ?">
+              <Controller
+                control={control}
+                name="iaGainEstime"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue>
+                        {(value: string) =>
+                          GAIN_IA_LABELS[value as (typeof GAIN_IA)[number]]
+                        }
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {GAIN_IA.map((value) => (
+                        <SelectItem key={value} value={value}>
+                          {GAIN_IA_LABELS[value]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </Field>
+          </div>
+
+          <div>
+            <p className="mb-2 text-sm font-medium text-foreground">
+              Sur quelles phases du projet l&apos;IA est-elle utilisée ?
+            </p>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {IA_PHASE_KEYS.map((key) => (
+                <Controller
+                  key={key}
+                  control={control}
+                  name={`iaPhases.${key}`}
+                  render={({ field }) => (
+                    <label className="flex items-center gap-2 text-sm text-foreground">
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                      {IA_PHASE_LABELS[key]}
+                    </label>
+                  )}
+                />
+              ))}
+            </div>
+          </div>
+
+          <Field label="Quel est le principal cas d'usage IA ayant apporté de la valeur sur votre projet ?">
+            <Input
+              placeholder="Réponse courte"
+              {...register("iaCasUsagePrincipal")}
+            />
+          </Field>
+
+          <Field label="Quel est aujourd'hui le principal frein à une utilisation plus importante de l'IA ?">
+            <Controller
+              control={control}
+              name="iaFrein"
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue>
+                      {(value: string) =>
+                        FREIN_IA_LABELS[value as (typeof FREIN_IA)[number]]
+                      }
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {FREIN_IA.map((value) => (
+                      <SelectItem key={value} value={value}>
+                        {FREIN_IA_LABELS[value]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </Field>
         </CardContent>
       </Card>
     </form>

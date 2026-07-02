@@ -4,6 +4,7 @@ import type {
   BesoinSupportItem,
   Causes,
   FicheFormValues,
+  IaPhases,
   RisqueItem,
 } from "@/lib/validations/fiche";
 
@@ -25,7 +26,10 @@ export function ficheToFormValues(fiche: Fiche | null): FicheFormValues | null {
     relationClientCommentaire: fiche.relationClientCommentaire ?? "",
     meteoEquipe: fiche.meteoEquipe,
     signauxFaibles: fiche.signauxFaibles ?? "",
+    departsCles: fiche.departsCles ?? "",
     causes: fiche.causes as Causes,
+    difficultesMaitrisables: fiche.difficultesMaitrisables ?? "",
+    difficultesNonMaitrisables: fiche.difficultesNonMaitrisables ?? "",
     ecartMargePct: toNumberOrUndefined(fiche.ecartMargePct),
     ecartMargeCommentaire: fiche.ecartMargeCommentaire ?? "",
     ecartPlanningJours: toNumberOrUndefined(fiche.ecartPlanningJours),
@@ -39,5 +43,10 @@ export function ficheToFormValues(fiche: Fiche | null): FicheFormValues | null {
     actions: fiche.actions as ActionItem[],
     risques: fiche.risques as RisqueItem[],
     besoinsSupport: fiche.besoinsSupport as BesoinSupportItem[],
+    iaUtilisee: fiche.iaUtilisee,
+    iaPhases: fiche.iaPhases as IaPhases,
+    iaGainEstime: fiche.iaGainEstime,
+    iaCasUsagePrincipal: fiche.iaCasUsagePrincipal ?? "",
+    iaFrein: fiche.iaFrein,
   };
 }

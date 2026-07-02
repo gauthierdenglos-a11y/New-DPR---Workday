@@ -11,19 +11,14 @@ datasource db {
 }
 
 enum TypeProjet {
-  BUILD
-  RUN
+  TM
   FORFAIT
-  REGIE
-  MIXTE
 }
 
 enum Phase {
-  CADRAGE
   BUILD
-  RECETTE
-  DEPLOIEMENT
   RUN
+  MIXTE
 }
 
 enum StatutGlobal {
@@ -52,6 +47,30 @@ enum StatutPlan {
   INEFFICACE
 }
 
+enum IaUtilisee {
+  OUI
+  EN_COURS
+  NON
+}
+
+enum GainIa {
+  ZERO
+  MOINS_5
+  CINQ_DIX
+  DIX_VINGT
+  PLUS_20
+}
+
+enum FreinIa {
+  MANQUE_TEMPS
+  MANQUE_COMPETENCES
+  CONTRAINTES_CLIENT
+  SECURITE_CONFIDENTIALITE
+  OUTILS_NON_DISPONIBLES
+  AUCUN
+  AUTRE
+}
+
 model Fiche {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
@@ -72,9 +91,13 @@ model Fiche {
   relationClientCommentaire String?
   meteoEquipe               MeteoEquipe
   signauxFaibles            String?
+  departsCles               String?
 
   // C. Compréhension rapide de la dérive
   causes Json
+
+  difficultesMaitrisables    String?
+  difficultesNonMaitrisables String?
 
   ecartMargePct              Float?
   ecartMargeCommentaire      String?
@@ -91,6 +114,13 @@ model Fiche {
   actions               Json
   risques               Json
   besoinsSupport        Json
+
+  // E. Intelligence Artificielle
+  iaUtilisee           IaUtilisee @default(NON)
+  iaPhases             Json       @default("{}")
+  iaGainEstime         GainIa     @default(ZERO)
+  iaCasUsagePrincipal  String?
+  iaFrein              FreinIa    @default(AUCUN)
 
   @@index([projet])
   @@index([dateMiseAJour])
