@@ -62,7 +62,7 @@ export default async function FichesPage() {
                       <TableCell>{fiche.client}</TableCell>
                       <TableCell>{fiche.responsablePilotage}</TableCell>
                       <TableCell>
-                        {fiche.dateMiseAJour.toLocaleDateString("fr-FR")}
+                        {fiche.updatedAt.toLocaleDateString("fr-FR")}
                       </TableCell>
                       <TableCell>{PHASE_LABELS[fiche.phaseActuelle]}</TableCell>
                       <TableCell>
@@ -81,6 +81,14 @@ export default async function FichesPage() {
                             className="text-blue-600 hover:bg-blue-600/10 hover:text-blue-600"
                           >
                             Modifier
+                          </Button>
+                          <Button
+                            nativeButton={false}
+                            render={<a href={`/api/fiches/${fiche.id}/pdf`} />}
+                            variant="ghost"
+                            size="sm"
+                          >
+                            PDF
                           </Button>
                           <DeleteFicheButton
                             ficheId={fiche.id}

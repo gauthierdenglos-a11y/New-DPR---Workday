@@ -154,6 +154,15 @@ export function FicheForm({
           >
             {readOnly ? "Retour" : "Annuler"}
           </Button>
+          {ficheId && (
+            <Button
+              variant="outline"
+              nativeButton={false}
+              render={<a href={`/api/fiches/${ficheId}/pdf`} />}
+            >
+              Télécharger en PDF
+            </Button>
+          )}
           {!readOnly && (
             <Button type="submit" disabled={isPending}>
               {isPending ? "Enregistrement..." : "Enregistrer la fiche"}

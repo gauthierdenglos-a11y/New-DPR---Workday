@@ -132,7 +132,7 @@ export async function deleteFiche(id: string) {
 }
 
 export async function listFiches() {
-  return prisma.fiche.findMany({ orderBy: { dateMiseAJour: "desc" } });
+  return prisma.fiche.findMany({ orderBy: { updatedAt: "desc" } });
 }
 
 export async function getFiche(id: string) {
