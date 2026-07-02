@@ -13,3 +13,10 @@ export function formatPeriodeFr(periode: Date): string {
     timeZone: "UTC",
   });
 }
+
+// Une fiche est historisée dès que sa période est antérieure au mois en
+// cours : le mois courant est passé, elle devient consultable en lecture
+// seule (le mois en cours reste modifiable jusqu'à la prochaine clôture).
+export function estHistorisee(periode: Date, now: Date = new Date()): boolean {
+  return periode.getTime() < debutDuMois(now).getTime();
+}

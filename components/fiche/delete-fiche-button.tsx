@@ -19,9 +19,11 @@ import { deleteFiche } from "@/lib/actions/fiche";
 export function DeleteFicheButton({
   ficheId,
   projet,
+  readOnly = false,
 }: {
   ficheId: string;
   projet: string;
+  readOnly?: boolean;
 }) {
   const [isPending, startTransition] = useTransition();
 
@@ -30,11 +32,29 @@ export function DeleteFicheButton({
       try {
         await deleteFiche(ficheId);
         toast.success("Fiche supprimée.");
-      } catch {
-        toast.error("Impossible de supprimer la fiche. Réessayez.");
+      } catch (error) {
+        const message =
+          error instanceof Error && error.message
+            ? error.message
+            : "Impossible de supprimer la fiche. Réessayez.";
+        toast.error(message);
       }
     });
   };
+
+  if (readOnly) {
+    return (
+      <Button
+        variant="ghost"
+        size="sm"
+        disabled
+        title="Fiche historisée : suppression désactivée."
+        className="text-destructive"
+      >
+        Supprimer
+      </Button>
+    );
+  }
 
   return (
     <Dialog>

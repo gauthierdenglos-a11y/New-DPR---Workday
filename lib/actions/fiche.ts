@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { ficheFormSchema, type FicheFormValues } from "@/lib/validations/fiche";
 import type { Prisma } from "@/lib/generated/prisma/client";
-import { debutDuMois, formatPeriodeFr } from "@/lib/periode";
+import { debutDuMois, estHistorisee, formatPeriodeFr } from "@/lib/periode";
 
 function toNumberOrNull(value: string | undefined) {
   if (!value || value.trim() === "") return null;
@@ -94,6 +94,12 @@ export async function updateFiche(id: string, values: FicheFormValues) {
   const data = toPrismaData(values);
   const existante = await prisma.fiche.findUniqueOrThrow({ where: { id } });
 
+  if (estHistorisee(existante.periode)) {
+    throw new Error(
+      `La fiche de ${formatPeriodeFr(existante.periode)} est historisée (mois clos) et n'est plus modifiable.`,
+    );
+  }
+
   await prisma.projet.update({
     where: { id: existante.projetId },
     data: {
@@ -115,6 +121,12 @@ export async function updateFiche(id: string, values: FicheFormValues) {
 }
 
 export async function deleteFiche(id: string) {
+  const existante = await prisma.fiche.findUniqueOrThrow({ where: { id } });
+  if (estHistorisee(existante.periode)) {
+    throw new Error(
+      `La fiche de ${formatPeriodeFr(existante.periode)} est historisée (mois clos) et ne peut plus être supprimée.`,
+    );
+  }
   await prisma.fiche.delete({ where: { id } });
   revalidatePath("/fiches");
 }

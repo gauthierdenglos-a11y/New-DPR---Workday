@@ -6,6 +6,8 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 
+import { Lock } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -80,10 +82,14 @@ export function FicheForm({
   mode,
   ficheId,
   defaultValues,
+  readOnly = false,
+  periodeLabel,
 }: {
   mode: "create" | "edit";
   ficheId?: string;
   defaultValues?: FicheFormValues;
+  readOnly?: boolean;
+  periodeLabel?: string;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -102,6 +108,7 @@ export function FicheForm({
   });
 
   const onSubmit = (values: FicheFormValues) => {
+    if (readOnly) return;
     startTransition(async () => {
       try {
         if (mode === "create") {
@@ -134,7 +141,9 @@ export function FicheForm({
             Fiche de Suivi Projet
           </h1>
           <p className="text-sm text-muted-foreground">
-            Édition de l&apos;état d&apos;avancement et analyse de la performance.
+            {readOnly
+              ? "Consultation d'une fiche historisée (mois clos)."
+              : "Édition de l'état d'avancement et analyse de la performance."}
           </p>
         </div>
         <div className="flex gap-2">
@@ -143,14 +152,28 @@ export function FicheForm({
             variant="outline"
             onClick={() => router.push("/fiches")}
           >
-            Annuler
+            {readOnly ? "Retour" : "Annuler"}
           </Button>
-          <Button type="submit" disabled={isPending}>
-            {isPending ? "Enregistrement..." : "Enregistrer la fiche"}
-          </Button>
+          {!readOnly && (
+            <Button type="submit" disabled={isPending}>
+              {isPending ? "Enregistrement..." : "Enregistrer la fiche"}
+            </Button>
+          )}
         </div>
       </div>
 
+      {readOnly && (
+        <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+          <Lock className="size-4 shrink-0" />
+          <p>
+            Cette fiche correspond à la période{" "}
+            <strong>{periodeLabel ?? "précédente"}</strong>, qui est clôturée.
+            Elle est conservée en lecture seule et n&apos;est plus modifiable.
+          </p>
+        </div>
+      )}
+
+      <fieldset disabled={readOnly} className="contents">
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="flex flex-col gap-6 lg:col-span-2">
           <Card>
@@ -746,6 +769,7 @@ export function FicheForm({
           </Field>
         </CardContent>
       </Card>
+      </fieldset>
     </form>
   );
 }

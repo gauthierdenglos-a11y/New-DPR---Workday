@@ -3,6 +3,7 @@ import { AppShell } from "@/components/layout/app-shell";
 import { FicheForm } from "@/components/fiche/fiche-form";
 import { getFiche } from "@/lib/actions/fiche";
 import { ficheToFormValues } from "@/lib/fiche-mapper";
+import { estHistorisee, formatPeriodeFr } from "@/lib/periode";
 
 export default async function FichePage({
   params,
@@ -13,13 +14,19 @@ export default async function FichePage({
   const fiche = await getFiche(id);
   const defaultValues = ficheToFormValues(fiche);
 
-  if (!defaultValues) {
+  if (!fiche || !defaultValues) {
     notFound();
   }
 
   return (
     <AppShell>
-      <FicheForm mode="edit" ficheId={id} defaultValues={defaultValues} />
+      <FicheForm
+        mode="edit"
+        ficheId={id}
+        defaultValues={defaultValues}
+        readOnly={estHistorisee(fiche.periode)}
+        periodeLabel={formatPeriodeFr(fiche.periode)}
+      />
     </AppShell>
   );
 }

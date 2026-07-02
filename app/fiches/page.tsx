@@ -14,6 +14,7 @@ import { StatutGlobalBadge } from "@/components/fiche/status-badge";
 import { FicheStatutBadge } from "@/components/fiche/fiche-statut-badge";
 import { DeleteFicheButton } from "@/components/fiche/delete-fiche-button";
 import { listFiches } from "@/lib/actions/fiche";
+import { estHistorisee } from "@/lib/periode";
 import { PHASE_LABELS } from "@/lib/validations/fiche";
 
 export default async function FichesPage() {
@@ -84,6 +85,7 @@ export default async function FichesPage() {
                           <DeleteFicheButton
                             ficheId={fiche.id}
                             projet={fiche.projet}
+                            readOnly={estHistorisee(fiche.periode)}
                           />
                         </div>
                       </TableCell>
