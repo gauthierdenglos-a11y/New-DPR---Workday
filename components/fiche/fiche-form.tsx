@@ -353,8 +353,8 @@ export function FicheForm({
               <CardTitle>Indicateurs Visuels</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-5">
-              <div>
-                <p className="mb-2 text-sm font-medium text-foreground">
+              <div className="flex flex-col gap-4">
+                <p className="text-sm font-medium text-foreground">
                   Statut global
                 </p>
                 <Controller
@@ -373,13 +373,13 @@ export function FicheForm({
                     />
                   )}
                 />
-                <p className="mt-2 text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   {STATUT_GLOBAL_LEGENDE}
                 </p>
               </div>
 
-              <div>
-                <p className="mb-2 text-sm font-medium text-foreground">
+              <div className="flex flex-col gap-4">
+                <p className="text-sm font-medium text-foreground">
                   Relation client
                 </p>
                 <Controller
@@ -398,15 +398,14 @@ export function FicheForm({
                   )}
                 />
                 <Textarea
-                  className="mt-2"
                   placeholder="Commentaire (max 2 lignes)"
                   rows={2}
                   {...register("relationClientCommentaire")}
                 />
               </div>
 
-              <div>
-                <p className="mb-2 text-sm font-medium text-foreground">
+              <div className="flex flex-col gap-4">
+                <p className="text-sm font-medium text-foreground">
                   Météo équipe
                 </p>
                 <Controller
@@ -425,7 +424,6 @@ export function FicheForm({
                   )}
                 />
                 <Textarea
-                  className="mt-2"
                   placeholder="Signaux faibles (turnover, fatigue, conflits...)"
                   rows={2}
                   {...register("signauxFaibles")}
@@ -723,6 +721,12 @@ export function FicheForm({
                   </SelectContent>
                 </Select>
               )}
+            />
+            <Textarea
+              className="mt-2"
+              placeholder="Commentaire (précisez votre réponse)"
+              rows={2}
+              {...register("iaFreinCommentaire")}
             />
           </Field>
         </CardContent>

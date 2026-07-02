@@ -45,7 +45,8 @@ export default async function FichesPage() {
                   <TableRow>
                     <TableHead>Projet</TableHead>
                     <TableHead>Client</TableHead>
-                    <TableHead>Date</TableHead>
+                    <TableHead>Responsable pilotage</TableHead>
+                    <TableHead>Date de dernière modification</TableHead>
                     <TableHead>Phase</TableHead>
                     <TableHead>Statut</TableHead>
                     <TableHead className="text-right">Action</TableHead>
@@ -56,6 +57,7 @@ export default async function FichesPage() {
                     <TableRow key={fiche.id}>
                       <TableCell className="font-medium">{fiche.projet}</TableCell>
                       <TableCell>{fiche.client}</TableCell>
+                      <TableCell>{fiche.responsablePilotage}</TableCell>
                       <TableCell>
                         {fiche.dateMiseAJour.toLocaleDateString("fr-FR")}
                       </TableCell>
@@ -65,12 +67,15 @@ export default async function FichesPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <Link
-                            href={`/fiches/${fiche.id}`}
-                            className="text-sm font-medium text-primary hover:underline"
+                          <Button
+                            nativeButton={false}
+                            render={<Link href={`/fiches/${fiche.id}`} />}
+                            variant="ghost"
+                            size="sm"
+                            className="text-blue-600 hover:bg-blue-600/10 hover:text-blue-600"
                           >
-                            É
-                          </Link>
+                            Modifier
+                          </Button>
                           <DeleteFicheButton
                             ficheId={fiche.id}
                             projet={fiche.projet}

@@ -323,6 +323,7 @@ export const ficheFormSchema = z.object({
   iaGainEstime: z.enum(GAIN_IA),
   iaCasUsagePrincipal: z.string().optional(),
   iaFrein: z.enum(FREIN_IA),
+  iaFreinCommentaire: z.string().optional(),
 });
 
 export type FicheFormValues = z.infer<typeof ficheFormSchema>;
@@ -361,4 +362,5 @@ export const DEFAULT_FICHE_VALUES: FicheFormValues = {
   iaGainEstime: "ZERO",
   iaCasUsagePrincipal: "",
   iaFrein: "AUCUN",
+  iaFreinCommentaire: "",
 };

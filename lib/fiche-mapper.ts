@@ -48,5 +48,6 @@ export function ficheToFormValues(fiche: Fiche | null): FicheFormValues | null {
     iaGainEstime: fiche.iaGainEstime,
     iaCasUsagePrincipal: fiche.iaCasUsagePrincipal ?? "",
     iaFrein: fiche.iaFrein,
+    iaFreinCommentaire: fiche.iaFreinCommentaire ?? "",
   };
 }

@@ -48,6 +48,7 @@ function toPrismaData(values: FicheFormValues) {
     iaGainEstime: parsed.iaGainEstime,
     iaCasUsagePrincipal: parsed.iaCasUsagePrincipal || null,
     iaFrein: parsed.iaFrein,
+    iaFreinCommentaire: parsed.iaFreinCommentaire || null,
   };
 }
 

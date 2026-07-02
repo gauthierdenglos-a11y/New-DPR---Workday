@@ -121,6 +121,7 @@ model Fiche {
   iaGainEstime         GainIa     @default(ZERO)
   iaCasUsagePrincipal  String?
   iaFrein              FreinIa    @default(AUCUN)
+  iaFreinCommentaire   String?
 
   @@index([projet])
   @@index([dateMiseAJour])
