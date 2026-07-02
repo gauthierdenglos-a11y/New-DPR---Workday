@@ -13,7 +13,15 @@ import type { Fiche } from "@/lib/generated/prisma/client";
 import { estHistorisee, formatPeriodeFr } from "@/lib/periode";
 import { PHASE_LABELS } from "@/lib/validations/fiche";
 
-function FicheRow({ fiche, toggle }: { fiche: Fiche; toggle?: ReactNode }) {
+function FicheRow({
+  fiche,
+  toggle,
+  suppressionBloquee,
+}: {
+  fiche: Fiche;
+  toggle?: ReactNode;
+  suppressionBloquee?: string;
+}) {
   const readOnly = estHistorisee(fiche.periode);
 
   return (
@@ -56,7 +64,12 @@ function FicheRow({ fiche, toggle }: { fiche: Fiche; toggle?: ReactNode }) {
           >
             PDF
           </Button>
-          <DeleteFicheButton ficheId={fiche.id} projet={fiche.projet} readOnly={readOnly} />
+          <DeleteFicheButton
+            ficheId={fiche.id}
+            projet={fiche.projet}
+            disabled={Boolean(suppressionBloquee)}
+            disabledReason={suppressionBloquee}
+          />
         </div>
       </TableCell>
     </TableRow>
@@ -94,8 +107,14 @@ export function FicheProjetGroup({
             </button>
           ) : undefined
         }
+        suppressionBloquee={
+          aDeHistorique
+            ? "Version en cours avec historique : supprimez d'abord les versions plus anciennes."
+            : undefined
+        }
       />
-      {deplie && historisees.map((fiche) => <FicheRow key={fiche.id} fiche={fiche} />)}
+      {deplie &&
+        historisees.map((fiche) => <FicheRow key={fiche.id} fiche={fiche} />)}
     </>
   );
 }

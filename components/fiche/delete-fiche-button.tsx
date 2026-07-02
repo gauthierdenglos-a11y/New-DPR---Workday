@@ -19,11 +19,13 @@ import { deleteFiche } from "@/lib/actions/fiche";
 export function DeleteFicheButton({
   ficheId,
   projet,
-  readOnly = false,
+  disabled = false,
+  disabledReason,
 }: {
   ficheId: string;
   projet: string;
-  readOnly?: boolean;
+  disabled?: boolean;
+  disabledReason?: string;
 }) {
   const [isPending, startTransition] = useTransition();
 
@@ -42,13 +44,13 @@ export function DeleteFicheButton({
     });
   };
 
-  if (readOnly) {
+  if (disabled) {
     return (
       <Button
         variant="ghost"
         size="sm"
         disabled
-        title="Fiche historisée : suppression désactivée."
+        title={disabledReason ?? "Suppression désactivée."}
         className="text-destructive"
       >
         Supprimer
