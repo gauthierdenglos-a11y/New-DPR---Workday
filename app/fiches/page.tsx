@@ -19,14 +19,14 @@ export default async function FichesPage() {
   return (
     <AppShell>
       <div className="flex flex-col gap-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-foreground">Mes Fiches</h1>
             <p className="text-sm text-muted-foreground">
               Fiche en cours par projet. Dépliez une ligne pour consulter son historique.
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <SimulateMonthButton />
             <Button nativeButton={false} render={<Link href="/fiches/nouveau" />}>
               Nouveau Projet

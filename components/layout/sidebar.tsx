@@ -21,11 +21,19 @@ const navItems = [
   { href: "/statistiques", label: "Statistiques", icon: BarChart3 },
 ];
 
-export function Sidebar() {
+// Contenu de navigation partagé entre la sidebar fixe (desktop) et le tiroir
+// mobile (`MobileNav`) : une seule source pour les liens, deux présentations.
+export function SidebarNav({
+  className,
+  onNavigate,
+}: {
+  className?: string;
+  onNavigate?: () => void;
+}) {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden w-56 shrink-0 flex-col justify-between border-r border-border bg-card px-4 py-6 md:flex">
+    <div className={cn("flex flex-col justify-between", className)}>
       <div>
         <div className="mb-6 px-2">
           <p className="text-sm font-semibold text-foreground">Project Center</p>
@@ -42,6 +50,7 @@ export function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={onNavigate}
                 className={cn(
                   "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                   active
@@ -77,6 +86,14 @@ export function Sidebar() {
           Déconnexion
         </button>
       </div>
+    </div>
+  );
+}
+
+export function Sidebar() {
+  return (
+    <aside className="hidden w-56 shrink-0 border-r border-border bg-card px-4 py-6 md:flex">
+      <SidebarNav className="w-full" />
     </aside>
   );
 }
