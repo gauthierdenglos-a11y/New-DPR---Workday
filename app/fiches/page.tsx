@@ -1,15 +1,7 @@
 import Link from "next/link";
 import { AppShell } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { FicheProjetGroup } from "@/components/fiche/fiche-projet-group";
+import { FichesList } from "@/components/fiche/fiches-list";
 import { SimulateMonthButton } from "@/components/fiche/simulate-month-button";
 import { listFichesGroupeesParProjet } from "@/lib/actions/fiche";
 
@@ -34,40 +26,7 @@ export default async function FichesPage() {
           </div>
         </div>
 
-        <Card>
-          <CardContent>
-            {groupes.length === 0 ? (
-              <p className="py-10 text-center text-sm text-muted-foreground">
-                Aucune fiche pour le moment. Créez la première fiche projet.
-              </p>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Projet</TableHead>
-                    <TableHead>Client</TableHead>
-                    <TableHead>Responsable pilotage</TableHead>
-                    <TableHead>Période</TableHead>
-                    <TableHead>Date de dernière modification</TableHead>
-                    <TableHead>Phase</TableHead>
-                    <TableHead>Statut</TableHead>
-                    <TableHead>Fiche du mois</TableHead>
-                    <TableHead className="text-right">Action</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {groupes.map((groupe) => (
-                    <FicheProjetGroup
-                      key={groupe.projetId}
-                      courante={groupe.courante}
-                      historisees={groupe.historisees}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
+        <FichesList groupes={groupes} />
       </div>
     </AppShell>
   );
