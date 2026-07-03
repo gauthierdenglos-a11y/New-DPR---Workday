@@ -131,31 +131,6 @@ export async function updateFiche(id: string, values: FicheFormValues) {
   redirect(`/fiches/${id}`);
 }
 
-export async function deleteFiche(id: string) {
-  const existante = await prisma.fiche.findUniqueOrThrow({ where: { id } });
-
-  // La version en cours (la plus récente du projet) ne peut être supprimée
-  // que si elle n'a pas d'historique : sinon, on supprime d'abord les
-  // versions plus anciennes. Ces dernières, elles, sont toujours supprimables.
-  const plusRecente = await prisma.fiche.findFirst({
-    where: { projetId: existante.projetId },
-    orderBy: { periode: "desc" },
-  });
-  if (plusRecente?.id === existante.id) {
-    const possedeHistorique = await prisma.fiche.count({
-      where: { projetId: existante.projetId, id: { not: existante.id } },
-    });
-    if (possedeHistorique > 0) {
-      throw new Error(
-        `La fiche de ${formatPeriodeFr(existante.periode)} est la version en cours du projet et possède un historique : supprimez d'abord les versions plus anciennes.`,
-      );
-    }
-  }
-
-  await prisma.fiche.delete({ where: { id } });
-  revalidatePath("/fiches");
-}
-
 export async function listFiches() {
   return prisma.fiche.findMany({ orderBy: { updatedAt: "desc" } });
 }

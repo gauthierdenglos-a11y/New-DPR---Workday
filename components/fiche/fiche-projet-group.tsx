@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { StatutGlobalBadge } from "@/components/fiche/status-badge";
 import { FicheStatutBadge } from "@/components/fiche/fiche-statut-badge";
-import { DeleteFicheButton } from "@/components/fiche/delete-fiche-button";
 import type { Fiche } from "@/lib/generated/prisma/client";
 import { formatPeriodeFr } from "@/lib/periode";
 import { PHASE_LABELS } from "@/lib/validations/fiche";
@@ -17,12 +16,10 @@ function FicheRow({
   fiche,
   readOnly,
   toggle,
-  suppressionBloquee,
 }: {
   fiche: Fiche;
   readOnly: boolean;
   toggle?: ReactNode;
-  suppressionBloquee?: string;
 }) {
   return (
     <TableRow className={readOnly ? "bg-muted/30" : undefined}>
@@ -64,12 +61,6 @@ function FicheRow({
           >
             PDF
           </Button>
-          <DeleteFicheButton
-            ficheId={fiche.id}
-            projet={fiche.projet}
-            disabled={Boolean(suppressionBloquee)}
-            disabledReason={suppressionBloquee}
-          />
         </div>
       </TableCell>
     </TableRow>
@@ -107,11 +98,6 @@ export function FicheProjetGroup({
               {deplie ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
             </button>
           ) : undefined
-        }
-        suppressionBloquee={
-          aDeHistorique
-            ? "Version en cours avec historique : supprimez d'abord les versions plus anciennes."
-            : undefined
         }
       />
       {deplie &&
