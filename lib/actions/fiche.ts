@@ -135,6 +135,21 @@ export async function listFiches() {
   return prisma.fiche.findMany({ orderBy: { updatedAt: "desc" } });
 }
 
+// Une seule fiche par projet : la plus récente (mois en cours). Les fiches
+// historisées des mois précédents ne doivent pas fausser les statistiques.
+export async function listFichesCourantes() {
+  const fiches = await prisma.fiche.findMany({ orderBy: { periode: "desc" } });
+
+  const parProjet = new Map<string, Fiche>();
+  for (const fiche of fiches) {
+    if (!parProjet.has(fiche.projetId)) {
+      parProjet.set(fiche.projetId, fiche);
+    }
+  }
+
+  return Array.from(parProjet.values());
+}
+
 export type FicheGroupe = {
   projetId: string;
   courante: Fiche;

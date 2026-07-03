@@ -1,33 +1,28 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ProjetCommand (fiche-flash-projet)
+
+Outil de suivi mensuel de projets ("fiches flash projet") : statut, dérive,
+plan d'action, risques, besoins de support et usage de l'IA, par projet et
+par mois. Next.js (App Router) + PostgreSQL/Prisma.
+
+📖 **Documentation développeur** :
+- [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) — vue d'ensemble du
+  produit, stack technique, structure du code, concepts métier, dette
+  technique connue.
+- [`docs/MODELE-DONNEES.md`](./docs/MODELE-DONNEES.md) — schéma de la base
+  de données (diagramme entité-relation), dictionnaire des champs, et
+  recommandations pour brancher PowerBI dessus.
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+docker compose up -d          # base Postgres locale — voir prisma/README-DB.md
+cp .env.example .env          # puis compléter si besoin
+npm install
+npx prisma migrate dev
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
 ## Clôture mensuelle & notifications
 

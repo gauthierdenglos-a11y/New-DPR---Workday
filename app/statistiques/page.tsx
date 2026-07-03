@@ -1,10 +1,10 @@
 import { AppShell } from "@/components/layout/app-shell";
 import { StatistiquesDashboard } from "@/components/statistiques/statistiques-dashboard";
-import { listFiches } from "@/lib/actions/fiche";
+import { listFichesCourantes } from "@/lib/actions/fiche";
 import { ficheToStat } from "@/lib/statistiques-utils";
 
 export default async function StatistiquesPage() {
-  const fiches = await listFiches();
+  const fiches = await listFichesCourantes();
   const stats = fiches.map(ficheToStat);
 
   return (
