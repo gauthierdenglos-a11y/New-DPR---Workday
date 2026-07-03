@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { sendClotureNotification } from "@/lib/email";
 import { debutDuMois, formatPeriodeFr, moisSuivant } from "@/lib/periode";
+import { requireAdmin } from "@/lib/session";
 import type { Prisma } from "@/lib/generated/prisma/client";
 
 export type ResultatGeneration = {
@@ -119,6 +120,9 @@ export type ResultatSimulation = {
 // génération des fiches et l'envoi des emails. Toutes les notifications sont
 // redirigées vers une adresse unique le temps des tests.
 export async function simulerMoisSuivant(): Promise<ResultatSimulation> {
+  // Agit sur tout le portefeuille : réservé aux administrateurs.
+  await requireAdmin();
+
   const derniere = await prisma.fiche.findFirst({ orderBy: { periode: "desc" } });
   const periodeCible = derniere ? moisSuivant(derniere.periode) : debutDuMois(new Date());
 

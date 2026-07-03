@@ -157,20 +157,67 @@ l'UI (`simulerMoisSuivant()`) permet de tester le mécanisme sans attendre le
 vrai changement de mois ; il redirige toutes les notifications vers une
 adresse email fixe codée en dur dans `cycle.ts`.
 
-## 6. Authentification
+## 6. Authentification et rôles (en attendant le SSO)
 
-**Il n'y a aujourd'hui aucune authentification.** Le bouton "Déconnexion" de
-la sidebar est désactivé avec le tooltip "Authentification à venir", et il
-n'existe pas de `middleware.ts`. La seule protection de l'application est le
-token partagé (`CRON_SECRET`) sur la route de clôture mensuelle. À traiter
-avant toute mise en production réelle multi-utilisateurs.
+**Il n'y a aujourd'hui aucune authentification réelle.** Le SSO n'est pas
+encore branché (bouton "Déconnexion" de la sidebar désactivé, pas de
+`middleware.ts`, la seule vraie protection reste le token partagé
+`CRON_SECRET` sur la route de clôture mensuelle). En attendant, un modèle de
+rôles a été mis en place pour préparer le futur SSO :
+
+- **Administrateur** : accès à toutes les fiches et aux statistiques du
+  portefeuille entier.
+- **Utilisateur standard** : accès limité aux fiches dont le
+  `responsableEmail` correspond à son propre email — c'est-à-dire son (ses)
+  projet(s).
+
+Tant que le SSO n'existe pas, l'identité et le rôle courants sont simulés via
+un **sélecteur de rôle** dans la navbar (`components/layout/role-switcher.tsx`),
+qui pose deux cookies (`pc_role`, `pc_email`) via la Server Action
+`setSession()` (`lib/actions/session.ts`). Toute la logique d'autorisation
+passe par un point d'entrée unique, `lib/session.ts` :
+
+- `getSession()` — lit la session courante (aujourd'hui : les cookies).
+- `estAutorise(session, responsableEmail)` — un admin passe toujours ; un
+  utilisateur standard doit avoir le même email.
+- `requireAdmin()` — à poser en tête des Server Actions réservées aux
+  admins (ex. `createFiche`, `simulerMoisSuivant`).
+
+**Migration vers le SSO** : il suffira de remplacer le corps de
+`getSession()` par la lecture du rôle/email portés par le token ou les
+claims du fournisseur SSO. Tous les appelants (`estAutorise`,
+`requireAdmin`, les pages `/fiches`, `/fiches/[id]`, `/fiches/nouveau`,
+`/statistiques`, la route PDF) continueront de fonctionner sans changement,
+puisqu'ils ne dépendent que du type `Session { role, email }` et non de sa
+source. Le sélecteur de rôle (cookies + dialog UI) devra alors être retiré.
+
+**Ce qui est déjà protégé côté serveur** (pas seulement côté UI, pour rester
+correct une fois le SSO branché) :
+- `/fiches` et `/statistiques` : listes filtrées par email pour les
+  utilisateurs standards.
+- `/fiches/[id]` et `GET /api/fiches/[id]/pdf` : `notFound()` / 404 si la
+  fiche n'appartient pas à l'utilisateur (accès direct par URL bloqué, pas
+  seulement masqué dans les listes).
+- `/fiches/nouveau`, `createFiche()`, `simulerMoisSuivant()` : réservés aux
+  administrateurs (actions qui portent sur tout le portefeuille).
+- `updateFiche()` : vérifie que le demandeur est admin ou propriétaire de la
+  fiche avant d'écrire.
+
+**Ce qui reste à faire** : rien n'empêche aujourd'hui un utilisateur du
+navigateur de modifier ces cookies lui-même pour se faire passer pour un
+autre email (c'est un mode de test, pas une sécurité) — c'est acceptable
+uniquement parce qu'il n'y a pas encore de vraie authentification en amont.
+Ne pas considérer ce mécanisme comme une protection réelle tant que le SSO
+n'est pas branché.
 
 ## 7. Dette technique & points d'attention
 
 - **Aucun test** (unitaire, intégration, e2e) et **aucune CI** (`.github/`
   absent). `npm run lint` (ESLint) et `tsc --noEmit` sont les seuls filets de
   sécurité actuels.
-- **Pas d'authentification / autorisation** (cf. §6).
+- **Pas de vraie authentification** (cf. §6) : le rôle/email sont auto-déclarés
+  via un sélecteur, à remplacer par le SSO avant toute mise en production
+  réelle multi-utilisateurs.
 - **Pas de pagination** sur les listes (fiches, statistiques) : tout est
   chargé et filtré côté client. Acceptable au volume actuel, à revoir si le
   nombre de projets/fiches augmente significativement.

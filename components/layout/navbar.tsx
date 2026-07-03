@@ -2,8 +2,13 @@ import Link from "next/link";
 import { Bell, HelpCircle, Settings, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { RoleSwitcher } from "@/components/layout/role-switcher";
+import { listResponsablesEmails } from "@/lib/actions/fiche";
+import { getSession } from "@/lib/session";
 
-export function Navbar() {
+export async function Navbar() {
+  const [session, emails] = await Promise.all([getSession(), listResponsablesEmails()]);
+
   return (
     <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-border bg-card px-4 sm:px-6">
       <div className="flex items-center gap-2 sm:gap-8">
@@ -22,10 +27,13 @@ export function Navbar() {
         <Button variant="ghost" size="icon" aria-label="Paramètres" className="hidden sm:inline-flex">
           <Settings />
         </Button>
-        <Button nativeButton={false} render={<Link href="/fiches/nouveau" />}>
-          <Plus />
-          <span className="hidden sm:inline">Nouveau Projet</span>
-        </Button>
+        {session.role === "ADMIN" && (
+          <Button nativeButton={false} render={<Link href="/fiches/nouveau" />}>
+            <Plus />
+            <span className="hidden sm:inline">Nouveau Projet</span>
+          </Button>
+        )}
+        <RoleSwitcher role={session.role} email={session.email} emails={emails} />
         <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
           GD
         </div>

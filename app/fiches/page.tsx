@@ -4,9 +4,14 @@ import { Button } from "@/components/ui/button";
 import { FichesList } from "@/components/fiche/fiches-list";
 import { SimulateMonthButton } from "@/components/fiche/simulate-month-button";
 import { listFichesGroupeesParProjet } from "@/lib/actions/fiche";
+import { estAutorise, getSession } from "@/lib/session";
 
 export default async function FichesPage() {
-  const groupes = await listFichesGroupeesParProjet();
+  const [session, groupes] = await Promise.all([getSession(), listFichesGroupeesParProjet()]);
+  const visibles =
+    session.role === "ADMIN"
+      ? groupes
+      : groupes.filter((g) => estAutorise(session, g.courante.responsableEmail));
 
   return (
     <AppShell>
@@ -18,15 +23,17 @@ export default async function FichesPage() {
               Fiche en cours par projet. Dépliez une ligne pour consulter son historique.
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <SimulateMonthButton />
-            <Button nativeButton={false} render={<Link href="/fiches/nouveau" />}>
-              Nouveau Projet
-            </Button>
-          </div>
+          {session.role === "ADMIN" && (
+            <div className="flex flex-wrap items-center gap-3">
+              <SimulateMonthButton />
+              <Button nativeButton={false} render={<Link href="/fiches/nouveau" />}>
+                Nouveau Projet
+              </Button>
+            </div>
+          )}
         </div>
 
-        <FichesList groupes={groupes} />
+        <FichesList groupes={visibles} />
       </div>
     </AppShell>
   );

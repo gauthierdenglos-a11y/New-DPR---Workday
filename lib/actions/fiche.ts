@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { ficheFormSchema, type FicheFormValues } from "@/lib/validations/fiche";
 import type { Fiche, Prisma } from "@/lib/generated/prisma/client";
 import { debutDuMois, formatPeriodeFr } from "@/lib/periode";
+import { estAutorise, getSession, requireAdmin } from "@/lib/session";
 
 function toNumberOrNull(value: string | undefined) {
   if (!value || value.trim() === "") return null;
@@ -66,6 +67,10 @@ export async function estFicheHistorisee(fiche: { projetId: string; periode: Dat
 }
 
 export async function createFiche(values: FicheFormValues) {
+  // Créer un nouveau projet ajoute au périmètre du portefeuille : réservé aux
+  // administrateurs (un utilisateur standard n'a accès qu'à son propre projet).
+  await requireAdmin();
+
   const data = toPrismaData(values);
   const periode = debutDuMois(data.dateMiseAJour);
 
@@ -104,6 +109,11 @@ export async function createFiche(values: FicheFormValues) {
 export async function updateFiche(id: string, values: FicheFormValues) {
   const data = toPrismaData(values);
   const existante = await prisma.fiche.findUniqueOrThrow({ where: { id } });
+
+  const session = await getSession();
+  if (!estAutorise(session, existante.responsableEmail)) {
+    throw new Error("Vous n'avez pas accès à cette fiche.");
+  }
 
   if (await estFicheHistorisee(existante)) {
     throw new Error(
@@ -182,4 +192,16 @@ export async function listFichesGroupeesParProjet(): Promise<FicheGroupe[]> {
 
 export async function getFiche(id: string) {
   return prisma.fiche.findUnique({ where: { id } });
+}
+
+// Alimente le sélecteur de rôle (mode de test avant SSO) : la liste des
+// emails "responsable pilotage" existants, pour simuler la connexion en tant
+// qu'un utilisateur standard donné.
+export async function listResponsablesEmails(): Promise<string[]> {
+  const projets = await prisma.projet.findMany({
+    select: { responsableEmail: true },
+    distinct: ["responsableEmail"],
+    orderBy: { responsableEmail: "asc" },
+  });
+  return projets.map((p) => p.responsableEmail);
 }

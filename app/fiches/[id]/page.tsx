@@ -4,6 +4,7 @@ import { FicheForm } from "@/components/fiche/fiche-form";
 import { estFicheHistorisee, getFiche } from "@/lib/actions/fiche";
 import { ficheToFormValues } from "@/lib/fiche-mapper";
 import { formatPeriodeFr } from "@/lib/periode";
+import { estAutorise, getSession } from "@/lib/session";
 
 export default async function FichePage({
   params,
@@ -11,10 +12,17 @@ export default async function FichePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const fiche = await getFiche(id);
+  const [session, fiche] = await Promise.all([getSession(), getFiche(id)]);
   const defaultValues = ficheToFormValues(fiche);
 
   if (!fiche || !defaultValues) {
+    notFound();
+  }
+
+  // Un utilisateur standard ne doit pas pouvoir ouvrir la fiche d'un autre
+  // projet, y compris en devinant l'URL : on masque l'existence de la fiche
+  // plutôt que d'afficher un message d'accès refusé.
+  if (!estAutorise(session, fiche.responsableEmail)) {
     notFound();
   }
 

@@ -3,6 +3,7 @@ import { renderToBuffer } from "@react-pdf/renderer";
 import { prisma } from "@/lib/prisma";
 import { estFicheHistorisee } from "@/lib/actions/fiche";
 import { FichePdfDocument } from "@/lib/fiche-pdf";
+import { estAutorise, getSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -11,8 +12,14 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const fiche = await prisma.fiche.findUnique({ where: { id } });
+  const [session, fiche] = await Promise.all([
+    getSession(),
+    prisma.fiche.findUnique({ where: { id } }),
+  ]);
   if (!fiche) {
+    return NextResponse.json({ error: "Fiche introuvable" }, { status: 404 });
+  }
+  if (!estAutorise(session, fiche.responsableEmail)) {
     return NextResponse.json({ error: "Fiche introuvable" }, { status: 404 });
   }
 
