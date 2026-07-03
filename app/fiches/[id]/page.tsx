@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
 import { AppShell } from "@/components/layout/app-shell";
 import { FicheForm } from "@/components/fiche/fiche-form";
-import { getFiche } from "@/lib/actions/fiche";
+import { estFicheHistorisee, getFiche } from "@/lib/actions/fiche";
 import { ficheToFormValues } from "@/lib/fiche-mapper";
-import { estHistorisee, formatPeriodeFr } from "@/lib/periode";
+import { formatPeriodeFr } from "@/lib/periode";
 
 export default async function FichePage({
   params,
@@ -24,7 +24,7 @@ export default async function FichePage({
         mode="edit"
         ficheId={id}
         defaultValues={defaultValues}
-        readOnly={estHistorisee(fiche.periode)}
+        readOnly={await estFicheHistorisee(fiche)}
         periodeLabel={formatPeriodeFr(fiche.periode)}
       />
     </AppShell>

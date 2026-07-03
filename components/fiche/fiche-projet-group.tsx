@@ -10,20 +10,20 @@ import { StatutGlobalBadge } from "@/components/fiche/status-badge";
 import { FicheStatutBadge } from "@/components/fiche/fiche-statut-badge";
 import { DeleteFicheButton } from "@/components/fiche/delete-fiche-button";
 import type { Fiche } from "@/lib/generated/prisma/client";
-import { estHistorisee, formatPeriodeFr } from "@/lib/periode";
+import { formatPeriodeFr } from "@/lib/periode";
 import { PHASE_LABELS } from "@/lib/validations/fiche";
 
 function FicheRow({
   fiche,
+  readOnly,
   toggle,
   suppressionBloquee,
 }: {
   fiche: Fiche;
+  readOnly: boolean;
   toggle?: ReactNode;
   suppressionBloquee?: string;
 }) {
-  const readOnly = estHistorisee(fiche.periode);
-
   return (
     <TableRow className={readOnly ? "bg-muted/30" : undefined}>
       <TableCell className="font-medium">
@@ -90,6 +90,7 @@ export function FicheProjetGroup({
     <>
       <FicheRow
         fiche={courante}
+        readOnly={false}
         toggle={
           aDeHistorique ? (
             <button
@@ -114,7 +115,9 @@ export function FicheProjetGroup({
         }
       />
       {deplie &&
-        historisees.map((fiche) => <FicheRow key={fiche.id} fiche={fiche} />)}
+        historisees.map((fiche) => (
+          <FicheRow key={fiche.id} fiche={fiche} readOnly />
+        ))}
     </>
   );
 }

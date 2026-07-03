@@ -1,7 +1,7 @@
 import { Document, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { Fiche } from "@/lib/generated/prisma/client";
 import { FICHE_STATUT_LABELS } from "@/lib/fiche-statut";
-import { estHistorisee, formatPeriodeFr } from "@/lib/periode";
+import { formatPeriodeFr } from "@/lib/periode";
 import {
   BESOIN_SUPPORT_LABELS,
   CAUSE_KEYS,
@@ -82,7 +82,13 @@ function FullField({ label, value }: { label: string; value?: string | number | 
   );
 }
 
-export function FichePdfDocument({ fiche }: { fiche: Fiche }) {
+export function FichePdfDocument({
+  fiche,
+  historisee,
+}: {
+  fiche: Fiche;
+  historisee: boolean;
+}) {
   const causes = fiche.causes as Causes;
   const actions = (fiche.actions as ActionItem[]).filter((a) => a.action);
   const risques = (fiche.risques as RisqueItem[]).filter((r) => r.description);
@@ -104,7 +110,7 @@ export function FichePdfDocument({ fiche }: { fiche: Fiche }) {
           {fiche.client} · Période {formatPeriodeFr(fiche.periode)} · Statut{" "}
           {FICHE_STATUT_LABELS[fiche.statut]}
         </Text>
-        {estHistorisee(fiche.periode) && (
+        {historisee && (
           <Text style={styles.badge}>
             Fiche historisée (mois clos) — conservée en lecture seule.
           </Text>

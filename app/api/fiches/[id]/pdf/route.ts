@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { prisma } from "@/lib/prisma";
+import { estFicheHistorisee } from "@/lib/actions/fiche";
 import { FichePdfDocument } from "@/lib/fiche-pdf";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +16,8 @@ export async function GET(
     return NextResponse.json({ error: "Fiche introuvable" }, { status: 404 });
   }
 
-  const buffer = await renderToBuffer(FichePdfDocument({ fiche }));
+  const historisee = await estFicheHistorisee(fiche);
+  const buffer = await renderToBuffer(FichePdfDocument({ fiche, historisee }));
   const nomFichier = `fiche-${fiche.projet}-${fiche.periode.toISOString().slice(0, 7)}.pdf`
     .toLowerCase()
     .replace(/[^a-z0-9.-]+/g, "-");

@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { ficheFormSchema, type FicheFormValues } from "@/lib/validations/fiche";
 import type { Fiche, Prisma } from "@/lib/generated/prisma/client";
-import { debutDuMois, estHistorisee, formatPeriodeFr } from "@/lib/periode";
+import { debutDuMois, formatPeriodeFr } from "@/lib/periode";
 
 function toNumberOrNull(value: string | undefined) {
   if (!value || value.trim() === "") return null;
@@ -54,6 +54,17 @@ function toPrismaData(values: FicheFormValues) {
   };
 }
 
+// Une fiche est historisée dès qu'une fiche plus récente existe pour le même
+// projet (nouvelle période générée par la clôture mensuelle, réelle ou
+// simulée) : elle devient alors consultable en lecture seule. La fiche la
+// plus récente d'un projet reste modifiable, indépendamment de la date système.
+export async function estFicheHistorisee(fiche: { projetId: string; periode: Date }) {
+  const plusRecente = await prisma.fiche.findFirst({
+    where: { projetId: fiche.projetId, periode: { gt: fiche.periode } },
+  });
+  return plusRecente !== null;
+}
+
 export async function createFiche(values: FicheFormValues) {
   const data = toPrismaData(values);
   const periode = debutDuMois(data.dateMiseAJour);
@@ -94,7 +105,7 @@ export async function updateFiche(id: string, values: FicheFormValues) {
   const data = toPrismaData(values);
   const existante = await prisma.fiche.findUniqueOrThrow({ where: { id } });
 
-  if (estHistorisee(existante.periode)) {
+  if (await estFicheHistorisee(existante)) {
     throw new Error(
       `La fiche de ${formatPeriodeFr(existante.periode)} est historisée (mois clos) et n'est plus modifiable.`,
     );
